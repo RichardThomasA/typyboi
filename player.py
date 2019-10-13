@@ -24,13 +24,23 @@ class Player:
             self.inventory.add_item(weapon)
  
     def is_alive(self):
+        """
+        return true if player hp is greater than 0
+        """
         return self.hp > 0
 
     def add_hp(self, delta_hp):
+        """
+        increases the player hp by 'delta_hp'.
+        if the new hp is greater than or equal to the max value, hp is set to maximum.
+        """
         new_hp = self.hp + delta_hp
         self.hp = new_hp if new_hp <= self.max_hp else self.max_hp
  
     def print_inventory(self):
+        """
+        Display all the inventory items and amount of gold you have.
+        """
         print('Inventory:')
         for item in self.inventory.items:
             print(item, '\n')
@@ -38,23 +48,47 @@ class Player:
         self.moved = False
     
     def move(self, dx, dy):
+        """
+        moves the player 'dx' positions in the x axis
+        and 'dy' position in the y axis.
+        """
         self.moved = True
         self.location_x += dx
         self.location_y += dy  
  
     def move_north(self):
+        """
+        move 1 position towards north (up).
+        """
         self.move(dx=0, dy=1)
     
     def move_south(self):
+        """
+        move 1 position south (down)
+        """
         self.move(dx=0, dy=-1)
     
     def move_east(self):
+        """
+        move 1 position east (right)
+        """
         self.move(dx=1, dy=0)
     
     def move_west(self):
+        """
+        move 1 position west (left)
+        """
         self.move(dx=-1, dy=0)
 
     def attack(self, enemy):
+        """
+        If the player has no weapon, 
+            the enemy damage is 1.
+        If the player has a weapon equiped, 
+            the enemy damage is the damage rate of the weapon 
+
+        also if the enemy is dead, you get items from the enemy
+        """
         self.moved = True
         if(self.equip_weapon == None):
             enemy.hp -= 1
@@ -65,12 +99,30 @@ class Player:
             self.get_enemy_itens(enemy)
 
     def get_enemy_itens(self, enemy):
+        """
+        If the enemy dropped any gold, it is added to the players gold.
+        if the enemy dropped any items, it is added to the players item list.
+        """
         dropped_gold, dropped_itens = enemy.drop_itens()
         self.inventory.add_gold(dropped_gold)
         for item in dropped_itens:
             self.inventory.add_item(item)
 
     def equip_weapon(self):
+        """
+        If the player has no weapon, a message saying 'you have no weapon' is displayed.
+
+        if the player has weapons, a numbered list of all weapons is displayed.
+            if you dont want to select a weapon ,press 'q'.
+            press the number corresponding to the weapon ou want to choose that weapon.
+
+            for eg:
+                 if you want weapon 3, just type '3' and press 'enter'.
+
+        And if you somehow screw this up, an error message is displayed.
+
+
+        """
         weapon_list = self.inventory.get_weapon_list()
 
         if len(weapon_list) == 0:
@@ -98,6 +150,14 @@ class Player:
         self.moved = False   
 
     def use_heal_item (self):
+        """
+        if you have no heal item, a message saying 'you have no heal item' is displayed.
+
+        if you have a heal item, a numbered list of items is displayed.
+        press the number corresponding to the item you want.
+        to cancel, type 'q'.
+
+        """
         healing_list = self.inventory.get_healing_item_list()
 
         if len(healing_list) == 0:
@@ -126,27 +186,47 @@ class Player:
         self.moved = True   
 
     def flee(self, tile):
+        """
+        To flee , we move to a random adjacent tile.
+        """
         available_moves = tile.get_adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         self.do_action(available_moves[r])
 
     def do_action(self, action, **kwargs):
+        """
+        Do the desired action.
+        """
         action_method = getattr(self, action.method.__name__)
         if action_method:
             action_method(**kwargs)
 
 class Inventory():
     def __init__(self, items = [], gold = 0):
+        """
+        Keyword arguments:
+        items       --list of items in the inventory
+        gold        --amount of gold in the inventory.
+        """
         self.items = items
         self.gold = gold
     
     def add_item(self, item):
+        """
+        Adds an item to the 'items' list
+        """
         self.items.append(item)
 
     def add_gold(self, gold):
+        """
+        adds gold to the inventory
+        """
         self.gold += gold
     
     def get_weapon_list(self):
+        """
+        A list of all weapons in the inventory is returned.
+        """
         weapon_list = []
         for item in self.items:
             if isinstance(item, Weapon):
@@ -155,6 +235,9 @@ class Inventory():
         return weapon_list
 
     def get_healing_item_list(self):
+        """
+        A list of all healing items in the inventory is returned.
+        """
         healing_list = []
         for item in self.items:
             if isinstance(item, HealingItem):
